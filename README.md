@@ -19,8 +19,9 @@ A bash script to efficiently backup files from an Android device's storage to a 
 
 ## Usage
 
+(caffeinate supported by mac & unix based only, for preventing sleep)
 ```bash
-./pull_sdcard.sh [-r remote_folder] [-l local_folder] [-v]
+caffeinate -i ./pull_sdcard.sh [-r remote_folder] [-l local_folder] [-v]
 ```
 
 ### Options
