@@ -40,8 +40,7 @@ check_dependencies() {
 
 # List files on Android device
 list_android_files() {
-  # adb shell find "$REMOTE_FOLDER" -type f | grep -Ev "^($FILTERED_FOLDERS)$" > $LOCAL_FOLDER/android.files
-  adb shell "ls -aRF --ignore=Android '$REMOTE_FOLDER'" > $LOCAL_FOLDER/android.files
+  adb shell "find '$REMOTE_FOLDER/' -type f" | grep -Ev "^($FILTERED_FOLDERS)$" > $LOCAL_FOLDER/android.files
   FILE_COUNT=$(wc -l < $LOCAL_FOLDER/android.files)  # Get total file count
 }
 
