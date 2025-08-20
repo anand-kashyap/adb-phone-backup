@@ -2,15 +2,20 @@
 
 # Default remote and local folders
 REMOTE_FOLDER="sdcard"
-LOCAL_FOLDER="$HOME/phone/iqoo7_16aug25"
+LOCAL_FOLDER=""
 FILTERED_FOLDERS=".|Android|cache|torrent" # . for folders starting with .
 
 # Usage
 usage() {
   echo "Usage: $0 [-r remote_folder] [-l local_folder]"
   echo "  -r: Set the remote folder path on the Android device (default: $REMOTE_FOLDER)"
-  echo "  -l: Set the local folder path to save files (default: $LOCAL_FOLDER)"
+  echo "  -l: Set the local folder path to save files (required)"
   echo "  -v: Run in validation mode (only checks if all remote files/folders exist locally)"
+  echo ""
+  echo "Examples:"
+  echo "  $0 -r sdcard -l ~/phone/backup"
+  echo "  $0 -r sdcard/DCIM -l ~/Desktop/photos"
+  echo "  $0 -r sdcard/Download -l ~/Downloads/phone -v"
   exit 1
 }
 
@@ -25,6 +30,13 @@ while getopts "r:l:vh" opt; do
     *) usage ;;
   esac
 done
+
+# Add validation for required argument
+if [ -z "$LOCAL_FOLDER" ]; then
+  echo "Error: local (-l) folder path is required"
+  usage
+fi
+
 
 # Check dependencies
 check_dependencies() {
