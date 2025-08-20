@@ -68,12 +68,10 @@ generate_update_list() {
   MISSING_COUNT=0
 
   while IFS= read -r line; do
-    # Remove non-printable characters
-    clean_line=$(echo "$line" | sed 's/[^[:print:]]//')
     # If file doesn't exist locally, add to update list
-    if ! grep -qF "$clean_line" $LOCAL_FOLDER/local.files; then
+    if ! grep -qF "$line" $LOCAL_FOLDER/local.files; then
       ((MISSING_COUNT++))
-      echo "$clean_line" >> $LOCAL_FOLDER/update.files
+      echo "$line" >> $LOCAL_FOLDER/update.files
     fi
   done < $LOCAL_FOLDER/android.files
   echo "Update list created."
@@ -91,9 +89,14 @@ download_files() {
   echo "Starting File download..."
   PROGRESS=0
   while IFS= read -r line; do
-    clean_line=$(echo "$line" | sed 's/[^[:print:]]//')
-    echo "Downloading ($((++PROGRESS))/$FILE_COUNT): $clean_line"
-    adb pull "$REMOTE_FOLDER/$clean_line" "$LOCAL_FOLDER/$clean_line"
+    echo "Downloading ($((++PROGRESS))/$FILE_COUNT): $line"
+
+    # Extract directory path and create it if it doesn't exist
+    dir_path=$(dirname "$LOCAL_FOLDER/$line")
+    mkdir -p "$dir_path"
+
+    # Perform adb pull
+    adb pull "$REMOTE_FOLDER/$line" "$LOCAL_FOLDER/$line"
   done < "$LOCAL_FOLDER/update.files"
   echo "Download complete!"
 }
@@ -103,7 +106,7 @@ main() {
   list_android_files
   list_local_files
   generate_update_list
-  if [ "$VALIDATION_MODE" = false ]; then
+  if [ "$VALIDATION_MODE" = false ] && [ "$MISSING_COUNT" -gt 0 ]; then
     download_files
   fi
 }
