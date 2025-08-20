@@ -63,13 +63,19 @@ convert_to_ignore_opts() {
 list_android_files() {
   convert_to_ignore_opts
 
-  adb shell "find '$REMOTE_FOLDER/' -type f $CONVERTED_IGNORE_OPTS" | sed "s|^$REMOTE_FOLDER/||" > $LOCAL_FOLDER/android.files
+  #include android media always
+  adb shell "find '$REMOTE_FOLDER/Android/media/' -type f" | sed "s|^$REMOTE_FOLDER/||" > $LOCAL_FOLDER/android.files
+  adb shell "find '$REMOTE_FOLDER/' -type f $CONVERTED_IGNORE_OPTS" | sed "s|^$REMOTE_FOLDER/||" >> $LOCAL_FOLDER/android.files
   FILE_COUNT=$(wc -l < $LOCAL_FOLDER/android.files)  # Get total file count
 }
 
 # List local files
 list_local_files() {
-  find "$LOCAL_FOLDER" -type f | sed "s|^$LOCAL_FOLDER/||" > $LOCAL_FOLDER/local.files
+  if [ -s "$LOCAL_FOLDER/local.files" ]; then
+    echo "Using existing local.files as it is present and non-empty."
+  else
+    find "$LOCAL_FOLDER" -type f | sed "s|^$LOCAL_FOLDER/||" > $LOCAL_FOLDER/local.files
+  fi
 }
 
 # Generate update list
