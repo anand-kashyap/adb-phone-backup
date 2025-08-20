@@ -3,8 +3,7 @@
 # Default remote and local folders
 REMOTE_FOLDER="sdcard"
 LOCAL_FOLDER="$HOME/phone/iqoo7_16aug25"
-FILTERED_FOLDERS="Android\|cache\|torrent\|\.thumbnails"
-# FILTERED_FOLDERS="Android|cache|torrent|\.thumbnails"
+FILTERED_FOLDERS=".|Android|cache|torrent" # . for files & folders starting with .
 
 # Usage
 usage() {
@@ -38,9 +37,19 @@ check_dependencies() {
   fi
 }
 
+convert_to_ignore_opts() {
+  CONVERTED_IGNORE_OPTS=""
+  IFS='|' read -ra patterns <<< "$FILTERED_FOLDERS"
+  for pattern in "${patterns[@]}"; do
+    CONVERTED_IGNORE_OPTS+=" -not -path \"*${pattern}*/*\""
+  done
+  echo "$CONVERTED_IGNORE_OPTS" # -not -path "*foo*/*" -not -path "*bar*/*"
+}
+
+
 # List files on Android device
 list_android_files() {
-  adb shell "find '$REMOTE_FOLDER/' -type f" | grep -Ev "^($FILTERED_FOLDERS)$" > $LOCAL_FOLDER/android.files
+  adb shell "find '$REMOTE_FOLDER/' -type f $CONVERTED_IGNORE_OPTS" | sed "s|^$REMOTE_FOLDER/||" > $LOCAL_FOLDER/android.files
   FILE_COUNT=$(wc -l < $LOCAL_FOLDER/android.files)  # Get total file count
 }
 
@@ -107,8 +116,9 @@ main() {
 
 validate() {
   check_dependencies
+  convert_to_ignore_opts
   list_android_files
-  list_local_files
+  # list_local_files
   # validate_files
 }
 
