@@ -117,6 +117,10 @@ download_files() {
     adb pull "$REMOTE_FOLDER/$line" "$LOCAL_FOLDER/$line"
   done < "$LOCAL_FOLDER/update.files"
   echo "Download complete!"
+
+  # Update local.files after download completes
+  cat "$LOCAL_FOLDER/update.files" >> "$LOCAL_FOLDER/local.files"
+  echo "local.files updated with downloaded files."
 }
 
 main() {
